@@ -14,12 +14,17 @@ class TimeframeStream(ExchangeRateHostStream):
 
     name = "timeframe"
     path = "/timeframe"
-    primary_keys: t.ClassVar[list[str]] = ["date", "currency"]
+    primary_keys: t.ClassVar[list[str]] = ["date", "source_currency", "dest_currency"]
     replication_key = "date"
     schema = th.PropertiesList(
         th.Property("date", th.DateTimeType, description="Date of the quote"),
         th.Property(
-            "currency",
+            "source_currency",
+            th.StringType,
+            description="{source}{destination} currency codes",
+        ),
+        th.Property(
+            "dest_currency",
             th.StringType,
             description="{source}{destination} currency codes",
         ),

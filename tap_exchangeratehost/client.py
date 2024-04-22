@@ -20,6 +20,13 @@ DATE_FORMAT = "%Y-%m-%d"
 MAX_DAY_RANGE = 365
 
 
+def remove_prefix(string: str, prefix: str) -> str:
+    if string.startswith(prefix):
+        return string[len(prefix):]
+    else:
+        return string
+
+
 class OneYearAtATimePaginator(BaseAPIPaginator):
     """Paginate over a time period, producing non-overlapping date pairs."""
 
@@ -27,7 +34,7 @@ class OneYearAtATimePaginator(BaseAPIPaginator):
     def add_days(date_str: str, days: int) -> tuple[str, bool]:
         """Calculate the date in `days` days, truncating that date to today."""
         new_date = (
-            datetime.strptime(date_str, DATE_FORMAT) + timedelta(days=days)  # noqa: DTZ007
+                datetime.strptime(date_str, DATE_FORMAT) + timedelta(days=days)  # noqa: DTZ007
         ).date()
 
         today = datetime.now(tz=timezone.utc).date()
@@ -108,9 +115,9 @@ class ExchangeRateHostStream(RESTStream):
         return OneYearAtATimePaginator(starting_date)
 
     def get_url_params(
-        self,
-        context: dict | None,  # noqa: ARG002
-        next_page_token: NextPageToken,
+            self,
+            context: dict | None,  # noqa: ARG002
+            next_page_token: NextPageToken,
     ) -> dict[str, Any]:
         """Return a dictionary of values to be used in URL parameterization.
 
@@ -145,7 +152,8 @@ class ExchangeRateHostStream(RESTStream):
                 for currencies, rate in rates.items():
                     yield {
                         "date": quote_date,
-                        "currency": currencies,
+                        "source_currency": json_resp["source"],
+                        "dest_currency": remove_prefix(currencies, json_resp["source"]),
                         "quote": float(rate),
                     }
         else:
